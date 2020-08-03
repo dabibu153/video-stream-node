@@ -29,15 +29,8 @@ router.get("/:id", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const schema = Joi.object({
-    name: Joi.string().required(),
-  });
+  validation(req, res);
 
-  const result = schema.validate(req.body);
-  if (result.error) {
-    res.status(400).send("bad input");
-    return;
-  }
   let new_genre = new Genre({
     name: req.body.name,
   });
@@ -46,15 +39,7 @@ router.post("/", async (req, res) => {
 });
 
 router.put("/:id", async (req, res) => {
-  const schema = Joi.object({
-    name: Joi.string().required(),
-  });
-
-  const result = schema.validate(req.body);
-  if (result.error) {
-    res.status(400).send("bad input");
-    return;
-  }
+  validation(req, res);
   const genre = await Genre.findByIdAndUpdate(
     req.params.id,
     { name: req.body.name },
@@ -77,5 +62,16 @@ router.delete("/:id", async (req, res) => {
   }
   res.send(genre);
 });
+function validation(req, res) {
+  const schema = Joi.object({
+    name: Joi.string().required(),
+  });
+
+  const result = schema.validate(req.body);
+  if (result.error) {
+    res.status(400).send("bad input");
+    return;
+  }
+}
 
 module.exports = router;
