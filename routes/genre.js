@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
-
+const { auth } = require("../middleware/auth");
 const genreSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -28,7 +28,7 @@ router.get("/:id", async (req, res) => {
   res.send(genre);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   validation(req, res);
 
   let new_genre = new Genre({

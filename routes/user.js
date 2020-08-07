@@ -5,6 +5,8 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("config");
+const { route } = require("./auth");
+const { auth } = require("../middleware/auth");
 
 const userSchema = new mongoose.Schema({
   userName: {
@@ -23,7 +25,17 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+userSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign({ _id: this._id }, config.get("jwtPrivateKey"));
+  return token;
+};
+
 const User = new mongoose.model("User", userSchema);
+
+router.get("/me", auth, async (req, res) => {
+  const user = await User.finfOne(req.user._id).select("-password");
+  res.send("user");
+});
 
 router.post("/", async (req, res) => {
   validation(req, res);
@@ -45,7 +57,7 @@ router.post("/", async (req, res) => {
 
   new_user.save();
 
-  const token = jwt.sign({ _id: new_user._id }, config.get("jwtPrivateKey"));
+  const token = new_user.generateAuthToken();
   res.header("x-auth-token", token).send("user added");
 });
 
